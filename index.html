@@ -724,6 +724,11 @@
         <div class="instructions">
             <i class="fas fa-info-circle"></i>
             Point your camera at the Hiro marker to see the interactive menu
+            <br>
+            <button onclick="testModelLoading()"
+                style="margin-top: 10px; padding: 5px 10px; background: rgba(255,255,255,0.2); border: 1px solid white; color: white; border-radius: 5px; font-size: 12px;">
+                Test 3D Models
+            </button>
         </div>
     </div>
 
@@ -734,8 +739,7 @@
 
         <!-- Hiro Marker -->
         <a-marker preset="hiro" id="hiroMarker">
-            <!-- Simple test object for debugging -->
-            <a-box position="0 0.5 0" material="color: red" scale="0.5 0.5 0.5"></a-box>
+            <!-- 3D models will be loaded here when dishes are selected -->
         </a-marker>
 
         <a-entity camera></a-entity>
@@ -983,6 +987,8 @@
             const marker = document.getElementById('hiroMarker');
             const modelLoading = document.getElementById('modelLoading');
 
+            console.log('Loading model for:', dish.name, 'Model URL:', getModelUrl(dish.model));
+
             // Show loading indicator
             modelLoading.classList.add('visible');
 
@@ -1021,20 +1027,34 @@
 
             marker.appendChild(modelEntity);
 
-            // Hide loading indicator after model loads
+            // Hide loading indicator after model loads - using correct A-Frame event names
             modelEntity.addEventListener('model-loaded', function () {
+                console.log('Model loaded successfully:', dish.name);
                 modelLoading.classList.remove('visible');
                 modelsLoaded.add(dish.model);
             });
 
-            // Handle model loading errors
-            modelEntity.addEventListener('model-error', function () {
+            // Handle model loading errors - using correct A-Frame event names
+            modelEntity.addEventListener('model-error', function (error) {
+                console.error('Model loading error:', error);
                 modelLoading.classList.remove('visible');
-                showError('Failed to load 3D model');
+                showError('Failed to load 3D model: ' + dish.name);
             });
 
-            // Cache the model
-            modelsLoaded.add(dish.model);
+            // Alternative event listeners for different A-Frame versions
+            modelEntity.addEventListener('loaded', function () {
+                console.log('Model loaded (alternative event):', dish.name);
+                modelLoading.classList.remove('visible');
+                modelsLoaded.add(dish.model);
+            });
+
+            // Add timeout to hide loading if model doesn't load
+            setTimeout(() => {
+                if (modelLoading.classList.contains('visible')) {
+                    console.warn('Model loading timeout:', dish.name);
+                    modelLoading.classList.remove('visible');
+                }
+            }, 10000); // 10 second timeout
         }
 
         // Enhanced model URL mapping - Using local GLB files
@@ -1212,6 +1232,45 @@
         function requestCameraAccess() {
             location.reload(); // Simplest way to re-trigger permission
         }
+
+        // Test function to verify GLB files are accessible
+        function testGLBFiles() {
+            console.log('Testing GLB file accessibility...');
+
+            const testFiles = [
+                './assets/glb/burge.glb',
+                './assets/glb/pizza.glb'
+            ];
+
+            testFiles.forEach(url => {
+                fetch(url, { method: 'HEAD' })
+                    .then(response => {
+                        if (response.ok) {
+                            console.log('✅ GLB file accessible:', url);
+                        } else {
+                            console.error('❌ GLB file not found:', url);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('❌ GLB file error:', url, error);
+                    });
+            });
+        }
+
+        // Test 3D model loading manually
+        function testModelLoading() {
+            console.log('Testing 3D model loading...');
+            const testDish = {
+                name: "Test Burger",
+                model: "burger.glb"
+            };
+            loadDishModel(testDish);
+        }
+
+        // Test GLB files on page load
+        window.addEventListener('load', function () {
+            setTimeout(testGLBFiles, 1000); // Test after 1 second
+        });
     </script>
 
     <!-- 
