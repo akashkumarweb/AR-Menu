@@ -756,7 +756,7 @@
             {
                 name: "Classic Burger",
                 price: 12.99,
-                model: "burger.glb",
+                model: "burger.glb", // Maps to ./assets/glb/burge.glb
                 description: "Juicy beef patty with fresh lettuce, tomatoes, and special sauce",
                 category: "main",
                 prepTime: "15 min"
@@ -764,7 +764,7 @@
             {
                 name: "Margherita Pizza",
                 price: 15.99,
-                model: "pizza.glb",
+                model: "pizza.glb", // Maps to ./assets/glb/pizza.glb
                 description: "Traditional Italian pizza with mozzarella, basil, and tomato sauce",
                 category: "main",
                 prepTime: "20 min"
@@ -1063,17 +1063,30 @@
             modelsLoaded.add(dish.model);
         }
 
-        // Enhanced model URL mapping
+        // Enhanced model URL mapping - Using local GLB files
         function getModelUrl(modelName) {
+            // Use local GLB files from assets/glb directory
             const modelMap = {
-                'burger.glb': 'https://poly.pizza/api/v1/models/burger.glb',
-                'pizza.glb': 'https://poly.pizza/api/v1/models/pizza.glb',
+                'burger.glb': './assets/glb/burge.glb', // Using the actual filename you have
+                'pizza.glb': './assets/glb/pizza.glb',
+                'salad.glb': './assets/glb/salad.glb', // Fallback if you add this later
+                'cake.glb': './assets/glb/cake.glb',   // Fallback if you add this later
+                'coffee.glb': './assets/glb/coffee.glb' // Fallback if you add this later
+            };
+
+            // Return local path if available, otherwise fallback to external
+            if (modelMap[modelName]) {
+                return modelMap[modelName];
+            }
+
+            // Fallback to external models for any missing local files
+            const externalModelMap = {
                 'salad.glb': 'https://poly.pizza/api/v1/models/salad.glb',
                 'cake.glb': 'https://poly.pizza/api/v1/models/cake.glb',
                 'coffee.glb': 'https://poly.pizza/api/v1/models/coffee.glb'
             };
 
-            return modelMap[modelName] || modelName;
+            return externalModelMap[modelName] || modelName;
         }
 
         // Enhanced favorites functionality
@@ -1233,7 +1246,16 @@
     6. Generate a QR code pointing to your hosted HTML file
     7. Test by scanning QR code and pointing camera at Hiro marker
     
-    ENHANCED GOOGLE SHEETS FORMAT:
+    LOCAL 3D MODELS:
+    ✅ burger.glb → ./assets/glb/burge.glb (2.4MB)
+    ✅ pizza.glb → ./assets/glb/pizza.glb (6.9MB)
+    
+    To add more models:
+    1. Place GLB files in ./assets/glb/ directory
+    2. Update the modelMap in getModelUrl() function
+    3. Add corresponding menu items in your Google Sheet
+    
+    GOOGLE SHEETS FORMAT:
     | name | price | model | description | category | prepTime |
     |------|-------|-------|-------------|----------|----------|
     | Burger | 12.99 | burger.glb | Juicy beef patty... | main | 15 min |
@@ -1251,6 +1273,7 @@
     ✅ Better visual feedback and animations
     ✅ Status bar showing connection status
     ✅ More detailed dish information
+    ✅ Local GLB file support for faster loading
     
     TROUBLESHOOTING:
     - Ensure HTTPS for camera access
@@ -1258,6 +1281,7 @@
     - Test on mobile device for best AR experience
     - Ensure good lighting for marker detection
     - Clear browser cache if experiencing issues
+    - Verify GLB files are accessible at ./assets/glb/ path
     -->
 </body>
 
